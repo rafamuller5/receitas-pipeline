@@ -79,15 +79,26 @@ jobs:
       - name: Checkout do código
         uses: actions/checkout@v4
 
+      - name: Subir/atualizar contêineres de Homologação
+        run: sudo docker compose -f docker-compose.homolog.yml up -d --build
+
+      - name: Aguardar MySQL ficar pronto (Homologação)
+        run: |
+          for i in $(seq 1 30); do
+            if sudo docker exec mysql-homolog mysqladmin ping -h 127.0.0.1 --silent; then
+              echo "MySQL pronto."
+              break
+            fi
+            echo "Aguardando MySQL... ($i/30)"
+            sleep 2
+          done
+
       - name: Versionamento do banco de dados (Flyway) - Homologação
         run: |
           sudo docker run --rm --network receitas-net \
             -v ${{ github.workspace }}/flyway/sql:/flyway/sql \
             -v ${{ github.workspace }}/flyway.homolog.conf:/flyway/conf/flyway.conf \
             flyway/flyway:10 migrate
-
-      - name: Subir/atualizar contêineres de Homologação
-        run: sudo docker compose -f docker-compose.homolog.yml up -d --build
 
       - name: Smoke test - aplicação respondendo em Homologação
         run: curl -fsS http://localhost:8081 || (echo "Homolog não respondeu" && exit 1)
@@ -103,15 +114,26 @@ jobs:
       - name: Checkout do código
         uses: actions/checkout@v4
 
+      - name: Subir/atualizar contêineres de Produção
+        run: sudo docker compose -f docker-compose.prod.yml up -d --build
+
+      - name: Aguardar MySQL ficar pronto (Produção)
+        run: |
+          for i in $(seq 1 30); do
+            if sudo docker exec mysql-prod mysqladmin ping -h 127.0.0.1 --silent; then
+              echo "MySQL pronto."
+              break
+            fi
+            echo "Aguardando MySQL... ($i/30)"
+            sleep 2
+          done
+
       - name: Versionamento do banco de dados (Flyway) - Produção
         run: |
           sudo docker run --rm --network receitas-net \
             -v ${{ github.workspace }}/flyway/sql:/flyway/sql \
             -v ${{ github.workspace }}/flyway.prod.conf:/flyway/conf/flyway.conf \
             flyway/flyway:10 migrate
-
-      - name: Subir/atualizar contêineres de Produção
-        run: sudo docker compose -f docker-compose.prod.yml up -d --build
 
       - name: Smoke test - aplicação respondendo em Produção
         run: curl -fsS http://localhost:8082 || (echo "Produção não respondeu" && exit 1)
