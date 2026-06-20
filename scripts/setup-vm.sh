@@ -1,32 +1,38 @@
 #!/usr/bin/env bash
 # setup-vm.sh
-# Prepara a VM da Univates do ZERO para rodar todo o pipeline:
-#   1. Instala Docker e Docker Compose (se não existirem)
-#   2. Cria a rede Docker compartilhada entre os ambientes
-#   3. Baixa, configura e instala o GitHub Actions Runner como serviço
+# Script único para preparar a VM da Univates DO ZERO, sem nenhuma ação manual além
+# de colar o token quando solicitado. Faz tudo:
+#   1. Clona o repositório do projeto
+#   2. Instala Docker
+#   3. Cria a rede Docker compartilhada
+#   4. Baixa, configura e instala o GitHub Actions Runner como serviço
 #
-# Uso:
+# Uso (numa VM limpa, sem nada instalado):
+#   curl -o setup-vm.sh -L https://raw.githubusercontent.com/rafamuller5/receitas-pipeline/main/scripts/setup-vm.sh
 #   chmod +x setup-vm.sh
-#   ./setup-vm.sh <URL_DO_REPO> <TOKEN_DO_RUNNER>
+#   ./setup-vm.sh
 #
-# O TOKEN_DO_RUNNER é obtido em:
-#   GitHub > seu repo > Settings > Actions > Runners > New self-hosted runner
-# (o token expira em poucos minutos, gere um novo se este script falhar por isso)
+# O script vai pedir o token do runner na hora (gere em:
+# GitHub > seu repo > Settings > Actions > Runners > New self-hosted runner).
+# O token expira em poucos minutos — só gere quando for de fato rodar este script.
 
 set -euo pipefail
 
-REPO_URL="${1:-}"
-RUNNER_TOKEN="${2:-}"
+REPO_URL="https://github.com/rafamuller5/receitas-pipeline.git"
+REPO_DIR="$HOME/receitas-pipeline"
 RUNNER_DIR="$HOME/actions-runner"
-RUNNER_VERSION="2.319.1"   # ajuste para a versão mais recente se preferir
+RUNNER_VERSION="2.335.1"
 
-if [[ -z "$REPO_URL" || -z "$RUNNER_TOKEN" ]]; then
-  echo "Uso: ./setup-vm.sh <URL_DO_REPO_GITHUB> <TOKEN_DO_RUNNER>"
-  echo "Ex.: ./setup-vm.sh https://github.com/seu-usuario/sistema-receitas ABCDEF123456"
-  exit 1
+echo "==> [1/5] Clonando o repositório..."
+if [[ -d "$REPO_DIR/.git" ]]; then
+  echo "Repositório já existe em $REPO_DIR, atualizando..."
+  git -C "$REPO_DIR" pull
+else
+  git clone "$REPO_URL" "$REPO_DIR"
 fi
+cd "$REPO_DIR"
 
-echo "==> [1/4] Instalando Docker (se necessário)..."
+echo "==> [2/5] Instalando Docker (se necessário)..."
 if ! command -v docker &> /dev/null; then
   curl -fsSL https://get.docker.com -o get-docker.sh
   sudo sh get-docker.sh
@@ -36,10 +42,19 @@ else
   echo "Docker já instalado."
 fi
 
-echo "==> [2/4] Criando rede Docker compartilhada 'receitas-net'..."
+echo "==> [3/5] Criando rede Docker compartilhada 'receitas-net'..."
 docker network inspect receitas-net >/dev/null 2>&1 || docker network create receitas-net
 
-echo "==> [3/4] Baixando e configurando o GitHub Actions Runner..."
+echo "==> [4/5] Configurando o GitHub Actions Runner..."
+echo ""
+echo "Gere o token agora em: $REPO_URL (sem .git) > Settings > Actions > Runners > New self-hosted runner"
+read -rp "Cole o token do runner aqui: " RUNNER_TOKEN
+
+if [[ -z "$RUNNER_TOKEN" ]]; then
+  echo "Nenhum token informado. Abortando."
+  exit 1
+fi
+
 mkdir -p "$RUNNER_DIR"
 cd "$RUNNER_DIR"
 
@@ -52,13 +67,14 @@ fi
 
 ./config.sh --url "$REPO_URL" --token "$RUNNER_TOKEN" --name "vm-univates" --unattended --replace
 
-echo "==> [4/4] Instalando o runner como serviço (inicia junto com a VM)..."
+echo "==> [5/5] Instalando o runner como serviço (inicia junto com a VM)..."
 sudo ./svc.sh install
 sudo ./svc.sh start
 
 echo ""
 echo "✅ Setup concluído."
+echo "   - Repositório clonado em: $REPO_DIR"
 echo "   - Verifique em GitHub > Settings > Actions > Runners se o runner aparece 'Idle'."
 echo "   - Os ambientes Homolog/Prod ainda NÃO existem; eles são criados quando o"
 echo "     workflow do GitHub Actions rodar pela primeira vez (etapa H do trabalho)."
-echo "   - Não esqueça de cadastrar os secrets SONAR_TOKEN no repositório do GitHub."
+echo "   - Não esqueça de cadastrar o secret SONAR_TOKEN no repositório do GitHub."
