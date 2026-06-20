@@ -40,18 +40,9 @@ if ! command -v docker &> /dev/null; then
 else
   echo "Docker já instalado."
 fi
-
-# Garante que o usuário está no grupo docker, independente de o Docker já existir ou não.
-# Necessário porque o runner do GitHub Actions vai rodar comandos "docker" sem sudo
-# mais adiante (no pipeline.yml). A mudança de grupo só vale para processos novos
-# (por isso usamos "sudo docker" no restante deste script).
-if ! id -nG "$USER" | grep -qw docker; then
-  echo "Adicionando $USER ao grupo docker..."
-  sudo usermod -aG docker "$USER"
-  echo "⚠️  Grupo docker adicionado. Pode ser necessário fazer logout/login para o"
-  echo "    seu próprio terminal usar 'docker' sem sudo - mas o runner do GitHub"
-  echo "    Actions (instalado como serviço no passo 5) já vai funcionar corretamente."
-fi
+# Nesta VM o usuário tem sudo NOPASSWD para tudo, exceto usermod/useradd/etc.
+# Por isso usamos "sudo docker" em todos os comandos deste script e no pipeline,
+# em vez de depender do usuário estar no grupo docker.
 
 echo "==> [3/5] Criando rede Docker compartilhada 'receitas-net'..."
 sudo docker network inspect receitas-net >/dev/null 2>&1 || sudo docker network create receitas-net

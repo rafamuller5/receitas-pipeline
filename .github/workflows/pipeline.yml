@@ -55,7 +55,7 @@ jobs:
 
       # ---- Build da imagem Docker da aplicação ----
       - name: Build da imagem Docker
-        run: docker build -t ${IMAGE_NAME}:${{ github.sha }} -t ${IMAGE_NAME}:latest .
+        run: sudo docker build -t ${IMAGE_NAME}:${{ github.sha }} -t ${IMAGE_NAME}:latest .
 
   # ───────────────────────────────────────────────
   # Etapa F) Atualização do ambiente de Homologação
@@ -70,13 +70,13 @@ jobs:
 
       - name: Versionamento do banco de dados (Flyway) - Homologação
         run: |
-          docker run --rm --network receitas-net \
+          sudo docker run --rm --network receitas-net \
             -v ${{ github.workspace }}/flyway/sql:/flyway/sql \
             -v ${{ github.workspace }}/flyway.homolog.conf:/flyway/conf/flyway.conf \
             flyway/flyway:10 migrate
 
       - name: Subir/atualizar contêineres de Homologação
-        run: docker compose -f docker-compose.homolog.yml up -d --build
+        run: sudo docker compose -f docker-compose.homolog.yml up -d --build
 
       - name: Smoke test - aplicação respondendo em Homologação
         run: curl -fsS http://localhost:8081 || (echo "Homolog não respondeu" && exit 1)
@@ -94,13 +94,13 @@ jobs:
 
       - name: Versionamento do banco de dados (Flyway) - Produção
         run: |
-          docker run --rm --network receitas-net \
+          sudo docker run --rm --network receitas-net \
             -v ${{ github.workspace }}/flyway/sql:/flyway/sql \
             -v ${{ github.workspace }}/flyway.prod.conf:/flyway/conf/flyway.conf \
             flyway/flyway:10 migrate
 
       - name: Subir/atualizar contêineres de Produção
-        run: docker compose -f docker-compose.prod.yml up -d --build
+        run: sudo docker compose -f docker-compose.prod.yml up -d --build
 
       - name: Smoke test - aplicação respondendo em Produção
         run: curl -fsS http://localhost:8082 || (echo "Produção não respondeu" && exit 1)

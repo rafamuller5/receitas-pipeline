@@ -11,14 +11,14 @@
 set -euo pipefail
 
 echo "==> Parando e removendo contêineres de Homologação e Produção..."
-docker compose -f docker-compose.homolog.yml down -v --remove-orphans 2>/dev/null || true
-docker compose -f docker-compose.prod.yml down -v --remove-orphans 2>/dev/null || true
+sudo docker compose -f docker-compose.homolog.yml down -v --remove-orphans 2>/dev/null || true
+sudo docker compose -f docker-compose.prod.yml down -v --remove-orphans 2>/dev/null || true
 
 echo "==> Removendo imagem da aplicação..."
-docker rmi sistema-receitas:latest 2>/dev/null || true
+sudo docker rmi sistema-receitas:latest 2>/dev/null || true
 
 echo "==> Removendo rede compartilhada 'receitas-net'..."
-docker network rm receitas-net 2>/dev/null || true
+sudo docker network rm receitas-net 2>/dev/null || true
 
 echo "==> Parando e removendo o GitHub Actions Runner (opcional)..."
 RUNNER_DIR="$HOME/actions-runner"
