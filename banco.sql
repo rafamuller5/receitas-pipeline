@@ -28,14 +28,8 @@ CREATE TABLE IF NOT EXISTS receita (
 );
 
 -- ============================================
--- POPULAR: Usuário (senha: admin123)
+-- POPULAR: Usuários (senhas: admin123 / maria123)
 -- ============================================
-INSERT INTO usuario (nome, login, senha, situacao) VALUES
-('Administrador', 'admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'ativo');
--- senha padrão: password (hash bcrypt do Laravel, mas usaremos MD5 simples para facilitar)
-
--- Removendo e recriando com senha MD5 simples para facilitar instalação
-DELETE FROM usuario;
 INSERT INTO usuario (nome, login, senha, situacao) VALUES
 ('Administrador', 'admin', MD5('admin123'), 'ativo'),
 ('Maria Silva', 'maria', MD5('maria123'), 'ativo');
