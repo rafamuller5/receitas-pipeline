@@ -24,13 +24,27 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Instalar dependências (Composer)
-        run: composer install --no-interaction --prefer-dist
+      # ---- Build da imagem Docker da aplicação (PHP + mysqli + Composer já incluídos) ----
+      - name: Build da imagem Docker
+        run: sudo docker build -t ${IMAGE_NAME}:${{ github.sha }} -t ${IMAGE_NAME}:latest .
 
       # ---- D) Testes automatizados (20 testes) ----
+      # Roda dentro do container (a VM não precisa ter PHP/Composer instalados).
       # phpunit.xml já gera: reports/junit-report.xml, reports/clover.xml, reports/teamcity.txt
-      - name: Rodar testes PHPUnit
-        run: composer run test-coverage
+      - name: Instalar dependências e rodar testes PHPUnit (dentro do container)
+        run: |
+          sudo docker run --rm \
+            -v ${{ github.workspace }}:/var/www/html \
+            -w /var/www/html \
+            ${IMAGE_NAME}:latest \
+            bash -c "composer install --no-interaction --prefer-dist && vendor/bin/phpunit --configuration phpunit.xml"
+
+      # O container roda como root, então os arquivos gerados (reports/, vendor/)
+      # ficam com dono root no host. Devolve a posse pro usuário do runner para
+      # os próximos passos (upload-artifact, sonar scan) conseguirem ler tudo.
+      - name: Corrigir permissões dos arquivos gerados pelo container
+        if: always()
+        run: sudo chown -R $(id -u):$(id -g) ${{ github.workspace }}
 
       - name: Publicar estatísticas dos testes no resumo do GitHub Actions
         uses: test-summary/action@v2
@@ -53,10 +67,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: https://sonarcloud.io
-
-      # ---- Build da imagem Docker da aplicação ----
-      - name: Build da imagem Docker
-        run: sudo docker build -t ${IMAGE_NAME}:${{ github.sha }} -t ${IMAGE_NAME}:latest .
 
   # ───────────────────────────────────────────────
   # Etapa F) Atualização do ambiente de Homologação
