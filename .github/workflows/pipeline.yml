@@ -59,6 +59,20 @@ jobs:
           name: relatorio-testes
           path: reports/
 
+      # ---- DEBUG temporário: confirmar que o PCOV está habilitado na imagem ----
+      - name: Debug - checar PCOV na imagem
+        run: |
+          sudo docker run --rm ${IMAGE_NAME}:latest php -m | grep -i pcov
+
+      # ---- DEBUG temporário: confirmar que o clover.xml tem cobertura real (não tudo zerado) ----
+      - name: Debug - conteúdo do clover.xml gerado
+        if: always()
+        run: |
+          echo "--- Tamanho do arquivo ---"
+          ls -la reports/clover.xml
+          echo "--- Primeiras linhas ---"
+          head -50 reports/clover.xml
+
       # ---- E) Análise de qualidade de código ----
       # Usa o sonar-project.properties já existente no repositório
       - name: SonarQube Cloud Scan
