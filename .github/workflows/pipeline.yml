@@ -84,13 +84,14 @@ jobs:
 
       - name: Aguardar MySQL ficar pronto (Homologação)
         run: |
-          for i in $(seq 1 30); do
-            if sudo docker exec mysql-homolog mysqladmin ping -h 127.0.0.1 --silent; then
+          for i in $(seq 1 40); do
+            if sudo docker run --rm --network receitas-net mysql:8.0 \
+                 mysqladmin ping -h mysql-homolog -uroot -proot_pass --silent 2>/dev/null; then
               echo "MySQL pronto."
               break
             fi
-            echo "Aguardando MySQL... ($i/30)"
-            sleep 2
+            echo "Aguardando MySQL... ($i/40)"
+            sleep 3
           done
 
       - name: Versionamento do banco de dados (Flyway) - Homologação
@@ -119,13 +120,14 @@ jobs:
 
       - name: Aguardar MySQL ficar pronto (Produção)
         run: |
-          for i in $(seq 1 30); do
-            if sudo docker exec mysql-prod mysqladmin ping -h 127.0.0.1 --silent; then
+          for i in $(seq 1 40); do
+            if sudo docker run --rm --network receitas-net mysql:8.0 \
+                 mysqladmin ping -h mysql-prod -uroot -proot_pass --silent 2>/dev/null; then
               echo "MySQL pronto."
               break
             fi
-            echo "Aguardando MySQL... ($i/30)"
-            sleep 2
+            echo "Aguardando MySQL... ($i/40)"
+            sleep 3
           done
 
       - name: Versionamento do banco de dados (Flyway) - Produção
