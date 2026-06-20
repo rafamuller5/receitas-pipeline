@@ -1,0 +1,4 @@
+/vendor/
+/reports/
+/.phpunit.cache/
+*.log

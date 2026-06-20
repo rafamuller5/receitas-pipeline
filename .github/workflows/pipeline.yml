@@ -1,0 +1,106 @@
+name: CI/CD - sistema-receitas
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: sistema-receitas
+
+jobs:
+
+  # ───────────────────────────────────────────────
+  # Etapas D (testes) e E (qualidade de código) + build da imagem
+  # ───────────────────────────────────────────────
+  build-test-quality:
+    runs-on: self-hosted   # roda na VM da Univates (runner registrado lá)
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Instalar dependências (Composer)
+        run: composer install --no-interaction --prefer-dist
+
+      # ---- D) Testes automatizados (20 testes) ----
+      # phpunit.xml já gera: reports/junit-report.xml, reports/clover.xml, reports/teamcity.txt
+      - name: Rodar testes PHPUnit
+        run: composer run test-coverage
+
+      - name: Publicar estatísticas dos testes no resumo do GitHub Actions
+        uses: test-summary/action@v2
+        with:
+          paths: reports/junit-report.xml
+        if: always()
+
+      - name: Upload dos relatórios de teste (artefato)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: relatorio-testes
+          path: reports/
+
+      # ---- E) Análise de qualidade de código ----
+      # Usa o sonar-project.properties já existente no repositório
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      # ---- Build da imagem Docker da aplicação ----
+      - name: Build da imagem Docker
+        run: docker build -t ${IMAGE_NAME}:${{ github.sha }} -t ${IMAGE_NAME}:latest .
+
+  # ───────────────────────────────────────────────
+  # Etapa F) Atualização do ambiente de Homologação
+  # ───────────────────────────────────────────────
+  deploy-homolog:
+    needs: build-test-quality
+    runs-on: self-hosted
+    environment: homologacao
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Versionamento do banco de dados (Flyway) - Homologação
+        run: |
+          docker run --rm --network receitas-net \
+            -v ${{ github.workspace }}/flyway/sql:/flyway/sql \
+            -v ${{ github.workspace }}/flyway.homolog.conf:/flyway/conf/flyway.conf \
+            flyway/flyway:10 migrate
+
+      - name: Subir/atualizar contêineres de Homologação
+        run: docker compose -f docker-compose.homolog.yml up -d --build
+
+      - name: Smoke test - aplicação respondendo em Homologação
+        run: curl -fsS http://localhost:8081 || (echo "Homolog não respondeu" && exit 1)
+
+  # ───────────────────────────────────────────────
+  # Etapa G) Atualização do ambiente de Produção
+  # ───────────────────────────────────────────────
+  deploy-prod:
+    needs: deploy-homolog
+    runs-on: self-hosted
+    environment: producao
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Versionamento do banco de dados (Flyway) - Produção
+        run: |
+          docker run --rm --network receitas-net \
+            -v ${{ github.workspace }}/flyway/sql:/flyway/sql \
+            -v ${{ github.workspace }}/flyway.prod.conf:/flyway/conf/flyway.conf \
+            flyway/flyway:10 migrate
+
+      - name: Subir/atualizar contêineres de Produção
+        run: docker compose -f docker-compose.prod.yml up -d --build
+
+      - name: Smoke test - aplicação respondendo em Produção
+        run: curl -fsS http://localhost:8082 || (echo "Produção não respondeu" && exit 1)

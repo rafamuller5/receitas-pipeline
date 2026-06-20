@@ -1,0 +1,38 @@
+services:
+  app-homolog:
+    build: .
+    image: sistema-receitas:latest
+    container_name: app-homolog
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      DB_HOST: mysql-homolog
+      DB_USER: root
+      DB_PASS: root_pass
+      DB_NAME: db_receitas
+    depends_on:
+      - mysql-homolog
+    networks:
+      - receitas-net
+
+  mysql-homolog:
+    image: mysql:8.0
+    container_name: mysql-homolog
+    restart: unless-stopped
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root_pass
+      MYSQL_DATABASE: db_receitas
+    volumes:
+      - mysql-homolog-data:/var/lib/mysql
+    networks:
+      - receitas-net
+
+volumes:
+  mysql-homolog-data:
+
+networks:
+  receitas-net:
+    external: true
