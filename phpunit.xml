@@ -6,7 +6,8 @@
          colors="true"
          stopOnFailure="false"
          displayDetailsOnTestsThatTriggerWarnings="true"
-         displayDetailsOnTestsThatTriggerDeprecations="true">
+         displayDetailsOnTestsThatTriggerDeprecations="true"
+         failOnWarning="false">
 
     <testsuites>
         <testsuite name="Sistema de Receitas — Suite Completa">
