@@ -99,7 +99,7 @@ jobs:
           sudo docker run --rm --network receitas-net \
             -v ${{ github.workspace }}/flyway/sql:/flyway/sql \
             -v ${{ github.workspace }}/flyway.homolog.conf:/flyway/conf/flyway.conf \
-            flyway/flyway:10 migrate
+            flyway/flyway:10 repair migrate
 
       - name: Smoke test - aplicação respondendo em Homologação
         run: curl -fsS http://localhost:8081 || (echo "Homolog não respondeu" && exit 1)
@@ -135,7 +135,7 @@ jobs:
           sudo docker run --rm --network receitas-net \
             -v ${{ github.workspace }}/flyway/sql:/flyway/sql \
             -v ${{ github.workspace }}/flyway.prod.conf:/flyway/conf/flyway.conf \
-            flyway/flyway:10 migrate
+            flyway/flyway:10 repair migrate
 
       - name: Smoke test - aplicação respondendo em Produção
         run: curl -fsS http://localhost:8082 || (echo "Produção não respondeu" && exit 1)
