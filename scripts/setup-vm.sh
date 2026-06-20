@@ -36,14 +36,25 @@ echo "==> [2/5] Instalando Docker (se necessário)..."
 if ! command -v docker &> /dev/null; then
   curl -fsSL https://get.docker.com -o get-docker.sh
   sudo sh get-docker.sh
-  sudo usermod -aG docker "$USER"
   rm get-docker.sh
 else
   echo "Docker já instalado."
 fi
 
+# Garante que o usuário está no grupo docker, independente de o Docker já existir ou não.
+# Necessário porque o runner do GitHub Actions vai rodar comandos "docker" sem sudo
+# mais adiante (no pipeline.yml). A mudança de grupo só vale para processos novos
+# (por isso usamos "sudo docker" no restante deste script).
+if ! id -nG "$USER" | grep -qw docker; then
+  echo "Adicionando $USER ao grupo docker..."
+  sudo usermod -aG docker "$USER"
+  echo "⚠️  Grupo docker adicionado. Pode ser necessário fazer logout/login para o"
+  echo "    seu próprio terminal usar 'docker' sem sudo - mas o runner do GitHub"
+  echo "    Actions (instalado como serviço no passo 5) já vai funcionar corretamente."
+fi
+
 echo "==> [3/5] Criando rede Docker compartilhada 'receitas-net'..."
-docker network inspect receitas-net >/dev/null 2>&1 || docker network create receitas-net
+sudo docker network inspect receitas-net >/dev/null 2>&1 || sudo docker network create receitas-net
 
 echo "==> [4/5] Configurando o GitHub Actions Runner..."
 echo ""
