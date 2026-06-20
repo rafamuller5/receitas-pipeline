@@ -47,11 +47,12 @@ jobs:
 
       # ---- E) Análise de qualidade de código ----
       # Usa o sonar-project.properties já existente no repositório
-      - name: SonarCloud Scan
+      - name: SonarQube Cloud Scan
         uses: SonarSource/sonarqube-scan-action@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
 
       # ---- Build da imagem Docker da aplicação ----
       - name: Build da imagem Docker
