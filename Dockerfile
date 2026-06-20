@@ -1,8 +1,14 @@
 FROM php:8.1-apache
 
-# Extensão necessária — includes/conexao.php usa mysqli
-RUN docker-php-ext-install mysqli \
-    && docker-php-ext-enable mysqli
+# Dependências de sistema: unzip (necessário para o Composer baixar pacotes)
+# e libzip-dev (necessário para compilar a extensão zip do PHP)
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends unzip libzip-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Extensões necessárias — includes/conexao.php usa mysqli; zip é usado pelo Composer
+RUN docker-php-ext-install mysqli zip \
+    && docker-php-ext-enable mysqli zip
 
 # Habilita mod_rewrite (comum em apps PHP com URLs amigáveis)
 RUN a2enmod rewrite
