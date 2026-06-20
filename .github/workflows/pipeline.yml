@@ -30,12 +30,16 @@ jobs:
 
       # ---- D) Testes automatizados (20 testes) ----
       # Roda dentro do container (a VM não precisa ter PHP/Composer instalados).
+      # IMPORTANTE: o volume é montado no MESMO caminho (${{ github.workspace }}) que será
+      # usado depois pelo Sonar Scanner no host. Isso garante que os caminhos de arquivo
+      # dentro do reports/clover.xml coincidam com os caminhos que o Sonar espera —
+      # caso contrário o Sonar não consegue casar a cobertura com os arquivos e mostra 0%.
       # phpunit.xml já gera: reports/junit-report.xml, reports/clover.xml, reports/teamcity.txt
       - name: Instalar dependências e rodar testes PHPUnit (dentro do container)
         run: |
           sudo docker run --rm \
-            -v ${{ github.workspace }}:/var/www/html \
-            -w /var/www/html \
+            -v ${{ github.workspace }}:${{ github.workspace }} \
+            -w ${{ github.workspace }} \
             ${IMAGE_NAME}:latest \
             bash -c "composer install --no-interaction --prefer-dist && vendor/bin/phpunit --configuration phpunit.xml"
 
@@ -64,14 +68,16 @@ jobs:
         run: |
           sudo docker run --rm ${IMAGE_NAME}:latest php -m | grep -i pcov
 
-      # ---- DEBUG temporário: confirmar que o clover.xml tem cobertura real (não tudo zerado) ----
+      # ---- DEBUG temporário: confirmar que o clover.xml tem cobertura real e caminhos corretos ----
       - name: Debug - conteúdo do clover.xml gerado
         if: always()
         run: |
           echo "--- Tamanho do arquivo ---"
           ls -la reports/clover.xml
-          echo "--- Primeiras linhas ---"
-          head -50 reports/clover.xml
+          echo "--- Caminhos dos arquivos no clover.xml ---"
+          grep -o 'name="[^"]*"' reports/clover.xml | head -5
+          echo "--- Linhas com cobertura real (count >= 1) ---"
+          grep -o 'count="[1-9][0-9]*"' reports/clover.xml | wc -l
 
       # ---- E) Análise de qualidade de código ----
       # Usa o sonar-project.properties já existente no repositório
