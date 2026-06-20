@@ -19,6 +19,7 @@
 set -euo pipefail
 
 REPO_URL="https://github.com/rafamuller5/receitas-pipeline.git"
+RUNNER_REG_URL="https://github.com/rafamuller5/receitas-pipeline"
 REPO_DIR="$HOME/receitas-pipeline"
 RUNNER_DIR="$HOME/actions-runner"
 RUNNER_VERSION="2.335.1"
@@ -49,7 +50,7 @@ sudo docker network inspect receitas-net >/dev/null 2>&1 || sudo docker network 
 
 echo "==> [4/5] Configurando o GitHub Actions Runner..."
 echo ""
-echo "Gere o token agora em: $REPO_URL (sem .git) > Settings > Actions > Runners > New self-hosted runner"
+echo "Gere o token agora em: $RUNNER_REG_URL > Settings > Actions > Runners > New self-hosted runner"
 read -rp "Cole o token do runner aqui: " RUNNER_TOKEN
 
 if [[ -z "$RUNNER_TOKEN" ]]; then
@@ -67,7 +68,7 @@ if [[ ! -f "./config.sh" ]]; then
   rm actions-runner.tar.gz
 fi
 
-./config.sh --url "$REPO_URL" --token "$RUNNER_TOKEN" --name "vm-univates" --unattended --replace
+./config.sh --url "$RUNNER_REG_URL" --token "$RUNNER_TOKEN" --name "vm-univates" --unattended --replace
 
 echo "==> [5/5] Instalando o runner como serviço (inicia junto com a VM)..."
 sudo ./svc.sh install
