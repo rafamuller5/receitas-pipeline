@@ -68,6 +68,15 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: https://sonarcloud.io
 
+      # Espera o resultado do Quality Gate no SonarCloud e FALHA o job se não passar.
+      # Sem isso, o scan acima só envia a análise, mas não bloqueia o pipeline.
+      - name: Verificar Quality Gate (bloqueia o deploy se a qualidade falhar)
+        uses: SonarSource/sonarqube-quality-gate-action@v1
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
+
   # ───────────────────────────────────────────────
   # Etapa F) Atualização do ambiente de Homologação
   # ───────────────────────────────────────────────
