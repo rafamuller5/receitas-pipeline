@@ -20,6 +20,7 @@ services:
     image: mysql:8.0
     container_name: mysql-homolog
     restart: unless-stopped
+    command: --skip-name-resolve
     ports:
       - "3307:3306"
     environment:

@@ -20,6 +20,7 @@ services:
     image: mysql:8.0
     container_name: mysql-prod
     restart: unless-stopped
+    command: --skip-name-resolve
     ports:
       - "3308:3306"
     environment:
