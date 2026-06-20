@@ -83,7 +83,7 @@ $msg = $_GET['msg'] ?? '';
     <!-- HEADER -->
     <div class="page-header">
         <div>
-            <h1>📋 Receitaz Cadastradas</h1>
+            <h1>📋 Receitas Cadastradas</h1>
             <p>Gerencie suas receitas doces e salgadas</p>
         </div>
         <a href="receita_form.php" class="btn btn-primary">➕ Nova Receita</a>
@@ -124,9 +124,11 @@ $msg = $_GET['msg'] ?? '';
     <!-- FILTROS -->
     <form method="GET" action="index.php">
         <div class="filters">
-            <input type="text" name="busca" placeholder="🔍 Buscar por nome ou descrição..."
+            <label for="busca" class="sr-only">Buscar por nome ou descrição</label>
+            <input type="text" id="busca" name="busca" placeholder="🔍 Buscar por nome ou descrição..."
                    value="<?= htmlspecialchars($busca) ?>">
-            <select name="tipo">
+            <label for="tipo" class="sr-only">Tipo de receita</label>
+            <select id="tipo" name="tipo">
                 <option value="">Todos os tipos</option>
                 <option value="doce"    <?= $tipo === 'doce'    ? 'selected' : '' ?>>🍰 Doce</option>
                 <option value="salgada" <?= $tipo === 'salgada' ? 'selected' : '' ?>>🥐 Salgada</option>

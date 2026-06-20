@@ -309,3 +309,16 @@ tbody td { padding: 0.8rem 1rem; vertical-align: middle; }
     thead th, tbody td { padding: .6rem .6rem; }
     .navbar { padding: 0 1rem; }
 }
+
+/* Esconde visualmente, mas mantém acessível para leitores de tela */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}

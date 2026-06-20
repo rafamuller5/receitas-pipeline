@@ -1,0 +1,13 @@
+.git
+.gitignore
+.github
+*.md
+flyway.homolog.conf
+flyway.prod.conf
+docker-compose*.yml
+scripts/
+reports/
+vendor/
+.scannerwork
+sonar-project.properties
+*.log
