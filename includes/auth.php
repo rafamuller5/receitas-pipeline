@@ -47,6 +47,37 @@ function funcaoComplexidadeAltaDeProposito(int $x): string
     else if ($x == 14) { return "quatorze"; }
     else if ($x == 15) { return "quinze"; }
     else if ($x == 16) { return "dezesseis"; }
+    else if ($x == 16) { return "dezesseis"; }
+    else if ($x == 16) { return "dezesseis"; }
+    else if ($x == 16) { return "dezesseis"; }
+    else if ($x == 16) { return "dezesseis"; }
+    else if ($x == 16) { return "dezesseis"; }
+    else if ($x == 16) { return "dezesseis"; }
+    else if ($x == 16) { return "dezesseis"; }
+    else if ($x == 16) { return "dezesseis"; }
+    else if ($x == 16) { return "dezesseis"; }
+    else if ($x == 16) { return "dezesseis"; }
+    else if ($x == 16) { return "dezesseis"; }
+    else if ($x == 16) { return "dezesseis"; }
+    else if ($x == 16) { return "dezesseis"; }
+    else if ($x == 16) { return "dezesseis"; }
+    else if ($x == 16) { return "dezesseis"; }
+    else if ($x == 16) { return "dezesseis"; }
+    else if ($x == 16) { return "dezesseis"; }
+    else if ($x == 16) { return "dezesseis"; }
+    else if ($x == 16) { return "dezesseis"; }
+    else if ($x == 16) { return "dezesseis"; }
+    else if ($x == 16) { return "dezesseis"; }
+    else if ($x == 16) { return "dezesseis"; }
+    else if ($x == 16) { return "dezesseis"; }
+    else if ($x == 16) { return "dezesseis"; }
+    else if ($x == 16) { return "dezesseis"; }
+    else if ($x == 16) { return "dezesseis"; }
+    else if ($x == 16) { return "dezesseis"; }
+    else if ($x == 16) { return "dezesseis"; }
+    else if ($x == 16) { return "dezesseis"; }
+    else if ($x == 16) { return "dezesseis"; }
+    else if ($x == 16) { return "dezesseis"; }
     else { return "desconhecido"; }
 }
 ?>
