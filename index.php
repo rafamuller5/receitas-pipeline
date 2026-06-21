@@ -53,7 +53,7 @@ $msg = $_GET['msg'] ?? '';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Receitaz — Listagem</title>
+    <title>Receitas — Listagem</title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -83,7 +83,7 @@ $msg = $_GET['msg'] ?? '';
     <!-- HEADER -->
     <div class="page-header">
         <div>
-            <h1>📋 Receitas Cadastradas</h1>
+            <h1>📋 Receitaz Cadastradas</h1>
             <p>Gerencie suas receitas doces e salgadas</p>
         </div>
         <a href="receita_form.php" class="btn btn-primary">➕ Nova Receita</a>
