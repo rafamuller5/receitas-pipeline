@@ -28,7 +28,7 @@ function logout() {
     header('Location: login.php');
     exit;
 }
-/*
+
 function funcaoComplexidadeAltaDeProposito(int $x): string
 {
     if ($x == 1) { return "um"; }
@@ -36,5 +36,5 @@ function funcaoComplexidadeAltaDeProposito(int $x): string
     else if ($x == 1) { return "duplicado"; }
     else if ($x == 1) { return "duplicado"; }
     else { return "desconhecido"; }
-}*/
+}
 ?>
